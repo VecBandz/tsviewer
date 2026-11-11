@@ -61,7 +61,7 @@ Logs live in `logs/<session>.jsonl`, one JSON event per line. Nothing is capture
 | File | What it does |
 |---|---|
 | `tlog.py` | Appends notes and command results to `logs/<session>.jsonl` |
-| `build_viewer.py` | Bundles every log into `viewer.html` and opens it with `termux-open` |
+| `build_viewer.py` | Bundles every log into `viewer.html` and opens it in your browser via a local-only server on `127.0.0.1:8765` (use `--no-open` to just build) |
 | `viewer_template.html` | The dashboard page (`build_viewer.py` fills in the data) |
 | `examples/` | Sample sessions for trying it out |
 
