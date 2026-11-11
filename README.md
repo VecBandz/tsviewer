@@ -13,7 +13,7 @@
 - **Filter box.** Searches every field.
 - **Keys.** ↑/↓ or j/k move between entries.
 - **Theme.** Light and dark follow your system setting.
-- **Single file.** No server is needed. `viewer.html` is self-contained, so you can share it or keep it as a record.
+- **Single file.** `viewer.html` is self-contained (no internet or install needed), so you can share it or keep it as a record.
 
 ## Install in Termux
 
