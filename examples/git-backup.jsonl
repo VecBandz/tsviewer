@@ -1,0 +1,3 @@
+{"ts": "2026-11-10T21:40:12-0500", "type": "note", "text": "Goal: nightly backup of ~/projects to GitHub"}
+{"ts": "2026-11-10T21:40:30-0500", "type": "command", "via": "run", "cmd": "git -C ~/projects status --short", "stdout": " M notes/todo.md\n?? scripts/backup.sh\n", "stderr": "", "exit": 0}
+{"ts": "2026-11-10T21:41:02-0500", "type": "command", "via": "run", "cmd": "git -C ~/projects push", "stdout": "", "stderr": "To github.com:example/projects.git\n   4f2a1c9..b81d3e0  main -> main\n", "exit": 0}

@@ -1,0 +1,5 @@
+{"ts": "2026-11-11T13:20:00-0500", "type": "note", "text": "Goal: serve a static site from Termux on port 8080"}
+{"ts": "2026-11-11T13:20:31-0500", "type": "command", "via": "run", "cmd": "pkg install -y nodejs-lts", "stdout": "nodejs-lts is already the newest version (22.21.0).\n", "stderr": "", "exit": 0}
+{"ts": "2026-11-11T13:21:10-0500", "type": "command", "via": "run", "cmd": "node server.js", "stdout": "", "stderr": "Error: listen EADDRINUSE: address already in use :::8080\n", "exit": 1}
+{"ts": "2026-11-11T13:21:44-0500", "type": "command", "via": "run", "cmd": "pkill -f 'http.server 8080'", "stdout": "", "stderr": "", "exit": 0}
+{"ts": "2026-11-11T13:22:05-0500", "type": "command", "via": "run", "cmd": "curl -sI http://localhost:8080", "stdout": "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 2310\n", "stderr": "", "exit": 0}
