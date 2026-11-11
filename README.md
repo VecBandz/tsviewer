@@ -2,6 +2,8 @@
 
 ![tsviewer: a dashboard for Termux session logs](docs/banner.png)
 
+▶ **[Watch the 30-second demo](https://www.facebook.com/reel/984946424171982)**: install, launch and tour on a real phone.
+
 **tsviewer is a dashboard for your Termux session records.** Log the commands you run, their output and exit codes, plus your own notes, then open one page that shows each session as a numbered timeline you can filter and step through. It works on your phone and on a desktop browser.
 
 - **Session picker.** Each `logs/<name>.jsonl` file is its own session.
