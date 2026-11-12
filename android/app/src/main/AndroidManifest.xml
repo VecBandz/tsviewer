@@ -22,7 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Share a log to TSViewer, e.g. termux-open --send logs/my-session.jsonl -->
+            <!-- Share a log to TSViewer from Termux or any app (see README) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
