@@ -1,0 +1,3 @@
+<resources>
+    <style name="Base.Theme.TSViewer" parent="android:Theme.Material.NoActionBar" />
+</resources>
