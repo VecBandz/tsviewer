@@ -64,7 +64,7 @@ Logs live in `logs/<session>.jsonl`, one JSON event per line. Nothing is capture
 |---|---|
 | `tlog.py` | Appends notes and command results to `logs/<session>.jsonl` |
 | `build_viewer.py` | Bundles every log into `viewer.html` and opens it in your browser via a local-only server on `127.0.0.1:8765` (use `--no-open` to just build) |
-| `viewer_template.html` | The dashboard page (`build_viewer.py` fills in the data) |
+| `TSViewer.html` | The dashboard page (`build_viewer.py` fills in the data) |
 | `examples/` | Sample sessions for trying it out |
 
 The page loads fonts from Google Fonts. Offline, it falls back to system fonts.
