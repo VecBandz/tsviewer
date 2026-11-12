@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -38,26 +38,36 @@ jobs:
           name: tsviewer-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
 
-      # Signed bundle for Google Play. Needs the four TSV_* repository secrets.
-      - name: Build signed release bundle
-        if: env.HAS_UPLOAD_KEY == 'true'
+      # Release bundle for Google Play. Signed here when the TSV_* upload-key
+      # secrets exist; otherwise it's built unsigned and signed after download.
+      - name: Build release bundle
         env:
           TSV_KEYSTORE_B64: ${{ secrets.TSV_KEYSTORE_B64 }}
           TSV_KEYSTORE_PASSWORD: ${{ secrets.TSV_KEYSTORE_PASSWORD }}
           TSV_KEY_ALIAS: ${{ secrets.TSV_KEY_ALIAS }}
           TSV_KEY_PASSWORD: ${{ secrets.TSV_KEY_PASSWORD }}
         run: |
-          echo "$TSV_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
-          export TSV_KEYSTORE="$RUNNER_TEMP/upload.jks"
+          if [ "$HAS_UPLOAD_KEY" = "true" ]; then
+            echo "$TSV_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            export TSV_KEYSTORE="$RUNNER_TEMP/upload.jks"
+          fi
           gradle -p android bundleRelease
           rm -f "$RUNNER_TEMP/upload.jks"
 
       - uses: actions/upload-artifact@v4
-        if: env.HAS_UPLOAD_KEY == 'true'
         with:
           name: tsviewer-release-aab
           path: android/app/build/outputs/bundle/release/*.aab
 
-      - name: No upload key yet
-        if: env.HAS_UPLOAD_KEY != 'true'
-        run: echo "::notice::Skipped the Play bundle. Add the TSV_KEYSTORE_B64, TSV_KEYSTORE_PASSWORD, TSV_KEY_ALIAS and TSV_KEY_PASSWORD secrets to build it."
+      # Main-branch builds also go to a private draft release, so the bundle can be
+      # fetched without Actions artifact access. Drafts are visible only to maintainers.
+      - name: Attach bundle to a draft release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="play-build-${{ github.run_number }}"
+          cp android/app/build/outputs/bundle/release/app-release.aab "tsviewer-${tag}.aab"
+          gh release create "$tag" "tsviewer-${tag}.aab" --draft --target "${{ github.sha }}" \
+            --title "TSViewer Play build ${{ github.run_number }}" \
+            --notes "versionCode ${{ github.run_number }}. Upload key signed: $HAS_UPLOAD_KEY."
