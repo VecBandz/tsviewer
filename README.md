@@ -58,6 +58,17 @@ Logs live in `logs/<session>.jsonl`, one JSON event per line. Nothing is capture
 
 `tlog.py ssh` runs commands in Termux over SSH. Edit `SSH_ARGS` at the top of `tlog.py` (for example `["-p", "8022", "localhost"]`). Then, in Termux, run `pkg install openssh` and start `sshd`.
 
+## Android app
+
+The `android/` folder wraps the same viewer page as a standalone Android app, **TSViewer**, for Google Play.
+
+- **Open logs** picks one or more `.jsonl` files; each becomes a session. **Remove session** takes one out of the app (the original file is untouched).
+- From Termux, send a log straight to the app: `termux-open --send logs/my-session.jsonl`
+- The three sample sessions in `examples/` are loaded on first launch.
+- No internet permission. Logs stay on the phone, and the page uses system fonts.
+
+GitHub Actions builds it on every change (`.github/workflows/android.yml`): a debug APK you can sideload, plus a signed `.aab` for Play once the `TSV_KEYSTORE_B64`, `TSV_KEYSTORE_PASSWORD`, `TSV_KEY_ALIAS` and `TSV_KEY_PASSWORD` repository secrets are set. Download them from the run's **Artifacts**. To build locally: `gradle -p android assembleDebug` (Gradle 8.13+, JDK 17, Android SDK 36).
+
 ## Files
 
 | File | What it does |
@@ -66,5 +77,6 @@ Logs live in `logs/<session>.jsonl`, one JSON event per line. Nothing is capture
 | `build_viewer.py` | Bundles every log into `viewer.html` and opens it in your browser via a local-only server on `127.0.0.1:8765` (use `--no-open` to just build) |
 | `TSViewer.html` | The dashboard page (`build_viewer.py` fills in the data) |
 | `examples/` | Sample sessions for trying it out |
+| `android/` | The TSViewer Android app (see above) |
 
 The page loads fonts from Google Fonts. Offline, it falls back to system fonts.

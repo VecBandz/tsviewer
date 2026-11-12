@@ -1,0 +1,73 @@
+name: Android app
+
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", "TSViewer.html", "examples/**", ".github/workflows/android.yml"]
+  pull_request:
+    paths: ["android/**", "TSViewer.html", "examples/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      HAS_UPLOAD_KEY: ${{ secrets.TSV_KEYSTORE_B64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+
+      # Installable test build: sideload it with "Install unknown apps".
+      - name: Build debug APK
+        run: gradle -p android assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tsviewer-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
+      # Release bundle for Google Play. Signed here when the TSV_* upload-key
+      # secrets exist; otherwise it's built unsigned and signed after download.
+      - name: Build release bundle
+        env:
+          TSV_KEYSTORE_B64: ${{ secrets.TSV_KEYSTORE_B64 }}
+          TSV_KEYSTORE_PASSWORD: ${{ secrets.TSV_KEYSTORE_PASSWORD }}
+          TSV_KEY_ALIAS: ${{ secrets.TSV_KEY_ALIAS }}
+          TSV_KEY_PASSWORD: ${{ secrets.TSV_KEY_PASSWORD }}
+        run: |
+          if [ "$HAS_UPLOAD_KEY" = "true" ]; then
+            echo "$TSV_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            export TSV_KEYSTORE="$RUNNER_TEMP/upload.jks"
+          fi
+          gradle -p android bundleRelease
+          rm -f "$RUNNER_TEMP/upload.jks"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tsviewer-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+
+      # Main-branch builds also go to a private draft release, so the bundle can be
+      # fetched without Actions artifact access. Drafts are visible only to maintainers.
+      - name: Attach bundle to a draft release
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="play-build-${{ github.run_number }}"
+          cp android/app/build/outputs/bundle/release/app-release.aab "tsviewer-${tag}.aab"
+          gh release create "$tag" "tsviewer-${tag}.aab" --draft --target "${{ github.sha }}" \
+            --title "TSViewer Play build ${{ github.run_number }}" \
+            --notes "versionCode ${{ github.run_number }}. Upload key signed: $HAS_UPLOAD_KEY."
