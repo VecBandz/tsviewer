@@ -17,6 +17,7 @@ jobs:
     env:
       VERSION_CODE: ${{ github.run_number }}
       HAS_UPLOAD_KEY: ${{ secrets.TSV_KEYSTORE_B64 != '' }}
+      HAS_PLAY_KEY: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -71,3 +72,15 @@ jobs:
           gh release create "$tag" "tsviewer-${tag}.aab" --draft --target "${{ github.sha }}" \
             --title "TSViewer Play build ${{ github.run_number }}" \
             --notes "versionCode ${{ github.run_number }}. Upload key signed: $HAS_UPLOAD_KEY."
+
+      # Main-branch builds that are signed with the upload key go straight to Play's
+      # closed testing (alpha) track as a draft release. Sending it for review stays manual.
+      - name: Upload bundle to Google Play closed testing
+        if: github.event_name != 'pull_request' && env.HAS_UPLOAD_KEY == 'true' && env.HAS_PLAY_KEY == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.vecbandz.tsviewer
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: alpha
+          status: draft
