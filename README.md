@@ -67,7 +67,7 @@ The `android/` folder wraps the same viewer page as a standalone Android app, **
 - The three sample sessions in `examples/` are loaded on first launch.
 - No internet permission. Logs stay on the phone, and the page uses system fonts.
 
-GitHub Actions builds it on every change (`.github/workflows/android.yml`): a debug APK you can sideload, plus a signed `.aab` for Play once the `TSV_KEYSTORE_B64`, `TSV_KEYSTORE_PASSWORD`, `TSV_KEY_ALIAS` and `TSV_KEY_PASSWORD` repository secrets are set. Download them from the run's **Artifacts**. To build locally: `gradle -p android assembleDebug` (Gradle 8.13+, JDK 17, Android SDK 36).
+GitHub Actions builds it on every change (`.github/workflows/android.yml`): a debug APK you can sideload, plus a signed `.aab` for Play once the `TSV_KEYSTORE_B64`, `TSV_KEYSTORE_PASSWORD`, `TSV_KEY_ALIAS` and `TSV_KEY_PASSWORD` repository secrets are set. Download them from the run's **Artifacts**. Every signed build on `main` is also published as a GitHub release named **TSViewer for Android … (build N)** with the APK attached, so anyone can download and install it outside Google Play. To build locally: `gradle -p android assembleDebug` (Gradle 8.13+, JDK 17, Android SDK 36).
 
 ## Files
 
