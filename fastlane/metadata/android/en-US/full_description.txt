@@ -1,0 +1,17 @@
+TSViewer turns your Termux session logs into a dashboard you can read on your phone.
+
+Log the commands you run, their output and exit codes, plus your own notes, with the tlog.py helper from the project's repository. Then open the .jsonl files in TSViewer and step through each session as a numbered timeline.
+
+<b>Features</b>
+<ul>
+<li>Session picker: each .jsonl log file is its own session</li>
+<li>Stats bar: sessions, entries, conversation turns, commands, failed commands and time span</li>
+<li>Numbered rail: passed and failed commands, notes, and user and assistant turns at a glance</li>
+<li>Reader: full command, stdout, stderr and exit code</li>
+<li>Filter box that searches every field</li>
+<li>Light and dark themes that follow your system setting</li>
+<li>Send a log straight from Termux with termux-open --send, or open one from a file manager</li>
+</ul>
+
+<b>Private by design</b>
+TSViewer has no internet permission. Your logs never leave the phone. Three sample sessions are included so you can try it right away.

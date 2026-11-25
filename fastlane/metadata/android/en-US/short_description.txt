@@ -1,0 +1,1 @@
+Dashboard for your Termux session logs, fully offline

@@ -36,8 +36,11 @@ android {
         applicationId = "com.vecbandz.tsviewer"
         minSdk = 26
         targetSdk = 36
-        versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
-        versionName = "1.0.0"
+        // Release version for local and F-Droid builds. Bump both on each release and
+        // tag the commit vX.Y.Z so F-Droid picks it up. Google Play builds in CI
+        // replace versionCode with the GitHub run number (see androidComponents below).
+        versionCode = 110
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -67,5 +70,8 @@ android {
 androidComponents {
     onVariants { variant ->
         variant.sources.assets?.addGeneratedSourceDirectory(copyTsvAssets, CopyTsvAssets::outputDir)
+        System.getenv("VERSION_CODE")?.toInt()?.let { code ->
+            variant.outputs.forEach { it.versionCode.set(code) }
+        }
     }
 }
