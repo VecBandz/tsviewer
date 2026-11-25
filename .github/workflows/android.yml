@@ -39,9 +39,10 @@ jobs:
           name: tsviewer-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
 
-      # Release bundle for Google Play. Signed here when the TSV_* upload-key
-      # secrets exist; otherwise it's built unsigned and signed after download.
-      - name: Build release bundle
+      # Release bundle for Google Play, plus a release APK for GitHub releases.
+      # Signed here when the TSV_* upload-key secrets exist; otherwise both are
+      # built unsigned.
+      - name: Build release bundle and APK
         env:
           TSV_KEYSTORE_B64: ${{ secrets.TSV_KEYSTORE_B64 }}
           TSV_KEYSTORE_PASSWORD: ${{ secrets.TSV_KEYSTORE_PASSWORD }}
@@ -52,7 +53,7 @@ jobs:
             echo "$TSV_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload.jks"
             export TSV_KEYSTORE="$RUNNER_TEMP/upload.jks"
           fi
-          gradle -p android bundleRelease
+          gradle -p android bundleRelease assembleRelease
           rm -f "$RUNNER_TEMP/upload.jks"
 
       - uses: actions/upload-artifact@v4
@@ -84,3 +85,33 @@ jobs:
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: alpha
           status: draft
+
+      # Main-branch builds signed with the upload key are also published as a public
+      # GitHub release with the APK attached, for people who install outside Google Play.
+      # Marked not-latest so the "latest release" link keeps pointing at the Termux zip.
+      # Runs after the Play upload so a problem here never holds Play back.
+      - name: Publish APK as a GitHub release
+        if: github.event_name != 'pull_request' && env.HAS_UPLOAD_KEY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version_name=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' android/app/build.gradle.kts)
+          tag="android-v${version_name}-build${VERSION_CODE}"
+          apk="TSViewer-${version_name}-build${VERSION_CODE}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "$apk"
+          sum=$(sha256sum "$apk" | cut -d' ' -f1)
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; skipping."
+            exit 0
+          fi
+          printf '%s\n' \
+            "TSViewer for Android ${version_name}, build ${VERSION_CODE}." \
+            "" \
+            "To install: download the APK on your phone, open it, and allow installs from your browser or file manager when Android asks." \
+            "" \
+            "This APK is signed with the developer's key, not Google Play's. If you already have TSViewer from Google Play, uninstall it first; the two can't update each other." \
+            "" \
+            "SHA-256: \`${sum}\`" > notes.md
+          gh release create "$tag" "$apk" --target "${{ github.sha }}" --latest=false \
+            --title "TSViewer for Android ${version_name} (build ${VERSION_CODE})" \
+            --notes-file notes.md
